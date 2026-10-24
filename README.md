@@ -1,4 +1,4 @@
-<p align="center"><img src="https://raw.githubusercontent.com/boss477/boss477/main/assets/banner-dark.svg?v=portrait-v3" alt="Fawaz Ahamed animated point-cloud portrait" width="100%" /></p>
+<p align="center"><img src="https://raw.githubusercontent.com/boss477/boss477/54a4d430602b59cb269bb4f53d14bd755318547b/assets/banner-dark.svg" alt="Fawaz Ahamed animated point-cloud portrait" width="100%" /></p>
 
 # Fawaz Ahamed
 
