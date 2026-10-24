@@ -3,7 +3,7 @@ name: Generate animated particle banner
 on:
   push:
     branches:
-      - feat/animated-particle-profile-banner
+      - fix/particle-portrait-v2
     paths:
       - "tools/generate_particle_banner.py"
       - "assets/fawaz.png"
@@ -17,7 +17,7 @@ jobs:
   generate-banner:
     runs-on: ubuntu-latest
     steps:
-      - name: Check out feature branch
+      - name: Check out portrait fix branch
         uses: actions/checkout@v4
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -25,7 +25,7 @@ jobs:
           python-version: "3.12"
       - name: Install image-processing dependencies
         run: python -m pip install --upgrade pillow numpy opencv-python-headless
-      - name: Generate animated SVG using depth-layered point-cloud sampling
+      - name: Generate high-contrast depth-layered point-cloud SVG
         run: python tools/generate_particle_banner.py
       - name: Commit generated banner
         run: |
@@ -33,6 +33,6 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add assets/banner-dark.svg
           if ! git diff --cached --quiet; then
-            git commit -m "Generate animated particle portrait banner"
+            git commit -m "Generate improved animated particle portrait"
             git push
           fi
