@@ -67,9 +67,10 @@ def sample(image):
             if random.random()>density: continue
             # The image maps to a 560x460 upper-body portrait.
             xx=(px/730-.5)*560; yy=py/600*460
-            # Shallow dome + tonal relief; subtle motion protects recognition.
+            # Synthetic depth relief, not a reconstructed head mesh.
+            # Wider separation makes parallax visible at README display sizes.
             dome=math.sqrt(max(0,1-(xx/300)**2-((yy-205)/280)**2))
-            z=26*dome+8*t
+            z=105*dome+24*t
             radius=.38+.57*math.sqrt(t)
             opacity=.5+.48*math.sqrt(t)
             points.append((xx,yy,z,t,radius,opacity))
@@ -105,7 +106,7 @@ def pixel_title(text, x, y, cell):
 def build_svg(points):
     out=['<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="520" viewBox="0 0 1200 520" role="img" aria-labelledby="title desc">',
     '<title id="title">Fawaz Ahamed — animated particle portrait</title>',
-    '<desc id="desc">Photo-derived monochrome portrait with glasses, hair, beard and suit, in twenty-four gently turning depth layers, above pixel lettering.</desc>',
+    '<desc id="desc">Photo-derived monochrome portrait with glasses, hair, beard and suit, in twenty-four turning depth layers, above pixel lettering.</desc>',
     '<rect width="1200" height="520" fill="#000"/>']
     r=np.random.default_rng(38)
     out.append('<g fill="#e8e4da">')
@@ -127,11 +128,11 @@ def build_svg(points):
         layer=[p for p in points if min(LAYERS-1,int((p[2]-zmin)/(zmax-zmin)*LAYERS))==k]
         depth=zmin+(k+.5)*(zmax-zmin)/LAYERS
         ts=[i/48 for i in range(49)]
-        yaw=[.16*math.sin(2*math.pi*t)**3 for t in ts]
+        yaw=[.55*math.sin(2*math.pi*t) for t in ts]
         kt=';'.join(f'{t:.5f}' for t in ts)
         tv=';'.join(f'{depth*math.sin(a):.2f} 0' for a in yaw)
         sv=';'.join(f'{math.cos(a):.5f} 1' for a in yaw)
-        out.append(f'<g><animateTransform attributeName="transform" type="translate" values="{tv}" keyTimes="{kt}" dur="14s" repeatCount="indefinite"/><g><animateTransform attributeName="transform" type="scale" values="{sv}" keyTimes="{kt}" dur="14s" repeatCount="indefinite"/>')
+        out.append(f'<g><animateTransform attributeName="transform" type="translate" values="{tv}" keyTimes="{kt}" dur="10s" repeatCount="indefinite"/><g><animateTransform attributeName="transform" type="scale" values="{sv}" keyTimes="{kt}" dur="10s" repeatCount="indefinite"/>')
         # Each layer owns its geometry, so links move with their endpoints.
         from scipy.spatial import cKDTree
         jacket=[p for p in layer if p[1]>275 or p[1]<95]
