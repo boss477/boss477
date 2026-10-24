@@ -128,7 +128,7 @@ def build_svg(points):
         layer=[p for p in points if min(LAYERS-1,int((p[2]-zmin)/(zmax-zmin)*LAYERS))==k]
         depth=zmin+(k+.5)*(zmax-zmin)/LAYERS
         ts=[i/48 for i in range(49)]
-        yaw=[.55*math.sin(2*math.pi*t) for t in ts]
+        yaw=[math.radians(18)*math.sin(2*math.pi*t) for t in ts]
         kt=';'.join(f'{t:.5f}' for t in ts)
         tv=';'.join(f'{depth*math.sin(a):.2f} 0' for a in yaw)
         sv=';'.join(f'{math.cos(a):.5f} 1' for a in yaw)
