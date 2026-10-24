@@ -28,3 +28,17 @@ I'm a student at VIT Chennai, building Symmet, AI design and visualization for b
 ## Talk to me
 
 I want to talk to people who sell into furniture showrooms or work on distribution, and to anyone building agent tooling. Email me at fawaz0212kb@gmail.com or find me on [LinkedIn](https://www.linkedin.com/in/fawaz-ah).
+
+---
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/boss477/boss477/output/github-snake-dark.svg">
+  <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/boss477/boss477/output/github-snake.svg">
+  <img alt="snake contribution graph" src="https://raw.githubusercontent.com/boss477/boss477/output/github-snake-dark.svg">
+</picture>
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/boss477/boss477/output/pacman-contribution-graph-dark.svg">
+  <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/boss477/boss477/output/pacman-contribution-graph.svg">
+  <img alt="pacman contribution graph" src="https://raw.githubusercontent.com/boss477/boss477/output/pacman-contribution-graph-dark.svg">
+</picture>
