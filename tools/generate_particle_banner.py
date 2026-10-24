@@ -1,184 +1,79 @@
 #!/usr/bin/env python3
-"""Generate the profile banner with a cutout portrait and animated depth layers.
+"""Deterministic photo-derived particle banner; no raster or script in the SVG.
 
-Sampling, spatial links, and yaw keyframes follow the method in
-EricJujianZou/EricJujianZou/tools/face.py. The source image is assets/fawaz.png.
+Depth-sliced SMIL yaw follows the approach demonstrated by EricJujianZou's
+profile tools/face.py. Geometry here is sampled from Fawaz's own portrait.
+Run: python tools/generate_particle_banner.py
+The 200px original limits facial resolution; replace it with the original photo
+and update the normalized silhouette if its framing changes.
 """
+from pathlib import Path
 import math
-import os
-import cv2
 import numpy as np
-from PIL import Image, ImageFilter
+import cv2
+from PIL import Image, ImageDraw, ImageFilter
 
-ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-SOURCE = os.path.join(ROOT, "assets", "fawaz.png")
-OUTPUT = os.path.join(ROOT, "assets", "banner-dark.svg")
-
-G = 224
-POINT_COUNT = 9000
-LAYERS = 26
-STEPS = 48
-DURATION = 14
-INK = "#e8e4da"
-SOFT = "#96938c"
-
-# Conservative silhouette around the supplied 200x200 image. GrabCut refines
-# the edge to remove the wall and plants without sampling them as portrait points.
-SILHOUETTE = np.array([
-    (74,49),(74,45),(82,42),(94,41),(105,42),(116,45),(123,50),(127,56),
-    (129,62),(128,69),(131,74),(127,78),(125,84),(121,90),(115,95),(109,99),
-    (110,103),(120,105),(134,109),(149,115),(160,122),(169,130),(175,139),
-    (177,147),(176,155),(172,165),(171,173),(175,185),(178,198),
-    (25,198),(25,185),(26,171),(29,156),(33,142),(40,131),(48,123),(58,116),
-    (69,110),(79,105),(80,101),(74,96),(68,91),(64,86),(60,82),(58,76),
-    (57,69),(59,62),(62,56),(68,51)
-], np.int32)
+ROOT = Path(__file__).resolve().parents[1]
+SOURCE = ROOT / 'assets/fawaz.png'
+OUTPUT = ROOT / 'assets/banner-dark.svg'
+INK = '#e8e4da'
+LAYERS = 24
+# Manually traced foreground, in the original photo's 200x200 coordinates.
+# Excludes the second person behind the left shoulder, wall, plants and sky.
+OUTLINE = [(72,50),(76,45),(83,42),(91,41),(96,39),(103,40),(108,40),
+ (113,43),(118,43),(123,47),(126,51),(126,56),(123,61),(124,68),
+ (130,72),(129,78),(125,82),(123,87),(121,94),(118,100),
+ (115,104),(125,108),(139,112),(149,115),(155,124),(162,142),
+ (172,161),(179,176),(180,184),(176,197),(24,199),(27,179),
+ (31,160),(34,144),(38,128),(48,124),(64,116),(80,108),
+ (82,103),(81,92),(78,88),(75,84),(74,77),(73,72),(71,65),(71,57)]
 
 
-def rng(seed):
-    state = [seed & 0xffffffff]
-    def random_value():
-        state[0] = (state[0] + 0x6D2B79F5) & 0xffffffff
-        value = state[0]
-        value = ((value ^ (value >> 15)) * (1 | value)) & 0xffffffff
-        value = (value + (((value ^ (value >> 7)) * (61 | value)) & 0xffffffff) ^ value) & 0xffffffff
-        return ((value ^ (value >> 14)) & 0xffffffff) / 4294967296
-    return random_value
+def cutout():
+    im = Image.open(SOURCE).convert('RGB')
+    w,h = im.size
+    # Trace at 4x resolution for a feathered, deterministic contour.
+    mask = Image.new('L',(w*4,h*4))
+    ImageDraw.Draw(mask).polygon([(x*w/50,y*h/50) for x,y in OUTLINE],fill=255)
+    mask = mask.resize(im.size, Image.Resampling.LANCZOS).filter(ImageFilter.GaussianBlur(.35))
+    rgba = im.convert('RGBA'); rgba.putalpha(mask)
+    # Tight upper-body crop: hair and chin occupy a much larger canvas fraction.
+    box = tuple(round(v*s) for v,s in zip((24/200,37/200,181/200,166/200),(w,h,w,h)))
+    return rgba.crop(box)
 
 
-def cutout(path):
-    rgb = np.asarray(Image.open(path).convert("RGB"))
-    height, width = rgb.shape[:2]
-    bgr = cv2.cvtColor(rgb, cv2.COLOR_RGB2BGR)
-    silhouette = np.zeros((height, width), np.uint8)
-    cv2.fillPoly(silhouette, [SILHOUETTE], 1)
-    mask = np.full((height, width), cv2.GC_BGD, np.uint8)
-    mask[silhouette == 1] = cv2.GC_PR_FGD
-    inner = cv2.erode(silhouette, np.ones((5, 5), np.uint8), iterations=1)
-    mask[(silhouette == 1) & (inner == 0)] = cv2.GC_PR_BGD
-
-    # Seed only interior hair, face, and suit regions, never the contour edge.
-    cv2.ellipse(mask, (96,58), (20,10), 0, 0, 360, cv2.GC_FGD, -1)
-    cv2.ellipse(mask, (101,75), (16,20), 0, 0, 360, cv2.GC_FGD, -1)
-    cv2.ellipse(mask, (94,147), (26,28), 0, 0, 360, cv2.GC_FGD, -1)
-    cv2.ellipse(mask, (134,155), (30,24), 0, 0, 360, cv2.GC_FGD, -1)
-
-    background_model = np.zeros((1,65), np.float64)
-    foreground_model = np.zeros((1,65), np.float64)
-    cv2.grabCut(bgr, mask, None, background_model, foreground_model, 10, cv2.GC_INIT_WITH_MASK)
-    alpha = np.where(
-        (mask == cv2.GC_FGD) | (mask == cv2.GC_PR_FGD), 255, 0
-    ).astype(np.uint8)
-
-    # Keep the connected component containing the face; remove stray background islands.
-    _, labels, _, _ = cv2.connectedComponentsWithStats((alpha > 0).astype(np.uint8), 8)
-    face_label = labels[75,101]
-    if face_label > 0:
-        alpha = np.where(labels == face_label, 255, 0).astype(np.uint8)
-    alpha = cv2.morphologyEx(alpha, cv2.MORPH_CLOSE, np.ones((3,3), np.uint8))
-    alpha = cv2.GaussianBlur(alpha, (3,3), 0.55)
-
-    # Fade the lower torso into sparse particles for a cleaner, face-forward banner.
-    fade = np.ones(height, np.float32)
-    for y in range(145, height):
-        fade[y] = max(0.0, min(1.0, (168 - y) / 23.0))
-    alpha = (alpha.astype(np.float32) * fade[:,None]).astype(np.uint8)
-    rgba = Image.fromarray(np.dstack([rgb, alpha]).astype(np.uint8), "RGBA")
-    crop = rgba.crop((22,34,180,168))
-    side = max(crop.size) + 8
-    square = Image.new("RGBA", (side,side), (0,0,0,0))
-    square.alpha_composite(crop, ((side-crop.width)//2, (side-crop.height)//2))
-    return square.resize((G,G), Image.Resampling.LANCZOS)
-
-
-def sample_points(image, count=POINT_COUNT, seed=7, dome=0.40):
-    pixels = image.load()
-    luminance = [0.0] * (G*G)
-    alpha = [0.0] * (G*G)
-    for y in range(G):
-        for x in range(G):
-            red, green, blue, a = pixels[x,y]
-            index = y*G+x
-            alpha[index] = a/255
-            luminance[index] = (0.2126*red + 0.7152*green + 0.0722*blue)/255
-
-    histogram = sorted(luminance[i] for i in range(0,G*G,3) if alpha[i] > 0.5)
-    low = histogram[int(len(histogram)*0.03)] if histogram else 0
-    high = histogram[int(len(histogram)*0.985)] if histogram else 1
-    luminance = [max(0,min(1,(v-low)/max(0.05,high-low))) for v in luminance]
-
-    # Local contrast preserves details from the glasses, beard, and hairline.
-    gray = Image.new("L", (G,G))
-    gray.putdata([round(v*255) for v in luminance])
-    enhanced = cv2.createCLAHE(clipLimit=2.2, tileGridSize=(8,8)).apply(np.asarray(gray))
-    luminance = [v/255 for v in enhanced.reshape(-1)]
-    blurred = [v/255 for v in gray_from(enhanced).filter(ImageFilter.BoxBlur(5)).getdata()]
-    weight = [
-        max(0,min(1,0.55*luminance[i] + 2.6*(luminance[i]-blurred[i]) + 0.12))
-        for i in range(G*G)
-    ]
-
-    random_value = rng(seed)
-    points = []
-    taken = bytearray(G*G)
-    attempts = 0
-    while len(points) < count and attempts < count*150:
-        attempts += 1
-        u, v = random_value(), random_value()
-        px, py = min(G-1,int(u*G)), min(G-1,int(v*G))
-        index = py*G+px
-        if taken[index] or alpha[index] < 0.4:
-            continue
-        tone = weight[index]
-        if random_value() > alpha[index] * (0.18 + 0.82*tone*tone):
-            continue
-        taken[index] = 1
-        dx, dy = (u-0.5)/0.44, (v-0.47)/0.52
-        radius2 = dx*dx + dy*dy
-        z = dome*math.sqrt(max(0,1-radius2)) + (tone-0.5)*0.12
-        points.append(((u-0.5)*2.3, -(v-0.47)*2.3, z, 0.25+0.75*tone))
-
-    if len(points) < count:
-        for index in range(G*G):
-            if len(points) >= count:
-                break
-            if alpha[index] > 0.55 and not taken[index]:
-                py, px = divmod(index, G)
-                u, v = (px+0.5)/G, (py+0.5)/G
-                tone = weight[index]
-                dx, dy = (u-0.5)/0.44, (v-0.47)/0.52
-                z = dome*math.sqrt(max(0,1-dx*dx-dy*dy)) + (tone-0.5)*0.12
-                points.append(((u-0.5)*2.3, -(v-0.47)*2.3, z, 0.25+0.75*tone))
-                taken[index] = 1
-
-    # Sparse short links between spatial neighbors, matching the source generator.
-    cell = 0.075
-    grid = {}
-    edges = []
-    for i,(x,y,z,tone) in enumerate(points):
-        grid.setdefault((math.floor(x/cell),math.floor(y/cell)),[]).append(i)
-    for i,(ax,ay,az,at) in enumerate(points):
-        cx,cy = math.floor(ax/cell),math.floor(ay/cell)
-        best = [(1e9,-1),(1e9,-1)]
-        for ox in (-1,0,1):
-            for oy in (-1,0,1):
-                for j in grid.get((cx+ox,cy+oy),()):
-                    if j == i:
-                        continue
-                    distance = (points[j][0]-ax)**2 + (points[j][1]-ay)**2
-                    if distance < best[0][0]:
-                        best = [(distance,j),best[0]]
-                    elif distance < best[1][0]:
-                        best[1] = (distance,j)
-        for distance,j in best:
-            if j > i and distance < cell*cell:
-                edges.append((i,j))
-    return points, edges
-
-
-def gray_from(array):
-    return Image.fromarray(array.astype(np.uint8), "L")
-
+def sample(image):
+    # Interpolation does not invent facial detail. A fine sampling grid avoids
+    # the old one-large-dot-per-source-pixel clumping and preserves dark glasses.
+    im = np.asarray(image.resize((730,600),Image.Resampling.LANCZOS))
+    alpha = im[:,:,3]/255.
+    gray = cv2.cvtColor(im[:,:,:3],cv2.COLOR_RGB2GRAY).astype(float)/255
+    valid = alpha>.8
+    lo,hi = np.quantile(gray[valid],[.02,.99])
+    lum = np.clip((gray-lo)/(hi-lo),0,1)
+    blur = cv2.GaussianBlur(lum,(0,0),2.0)
+    detail = np.clip(lum-blur,-.2,.2)
+    tone = np.clip(lum+1.3*detail,0,1)
+    edge = np.clip(np.hypot(cv2.Sobel(lum,cv2.CV_64F,1,0),cv2.Sobel(lum,cv2.CV_64F,0,1)),0,1)
+    random = np.random.default_rng(477)
+    points=[]
+    # Jittered stratified sampling prevents overlaps and keeps negative space.
+    for y in np.arange(0,600,2.0):
+        for x in np.arange(0,730,2.0):
+            px=min(729,int(x+random.uniform(0,2))); py=min(599,int(y+random.uniform(0,2)))
+            a=alpha[py,px]; t=tone[py,px]; e=edge[py,px]
+            fade=np.clip((600-py)/95,0,1)
+            density=(.02+.93*math.sqrt(t)+.19*e)*a*fade
+            if random.random()>density: continue
+            # The image maps to a 560x460 upper-body portrait.
+            xx=(px/730-.5)*560; yy=py/600*460
+            # Shallow dome + tonal relief; subtle motion protects recognition.
+            dome=math.sqrt(max(0,1-(xx/300)**2-((yy-205)/280)**2))
+            z=26*dome+8*t
+            radius=.38+.57*math.sqrt(t)
+            opacity=.5+.48*math.sqrt(t)
+            points.append((xx,yy,z,t,radius,opacity))
+    return points
 
 FONT = {
     "F":["11111","10000","11110","10000","10000","10000","10000"],
@@ -207,91 +102,68 @@ def pixel_title(text, x, y, cell):
     return f'<path d="{"".join(paths)}" fill="{INK}"/>'
 
 
-def build_svg(points, edges):
-    width, height = 1000, 380
-    center_x, center_y, scale = 500, 133, 130
-    depths = [point[2] for point in points]
-    min_z, max_z = min(depths), max(depths)
-    def layer(z):
-        return min(LAYERS-1, int((z-min_z)/(max_z-min_z+1e-9)*LAYERS))
-    layer_centers = [min_z+(k+0.5)*(max_z-min_z)/LAYERS for k in range(LAYERS)]
-    def yaw(t):
-        return 0.55*math.sin(2*math.pi*t)**3
-    yaws = [yaw(k/STEPS) for k in range(STEPS)] + [yaw(0)]
-    key_times = ";".join(f"{k/STEPS:.4f}" for k in range(STEPS+1))
-
-    svg = [
-        f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}" viewBox="0 0 {width} {height}">',
-        '<title>Fawaz Ahamed — animated point-cloud portrait</title>',
-        '<defs><radialGradient id="bg"><stop stop-color="#101113"/><stop offset="1" stop-color="#020304"/></radialGradient></defs>',
-        f'<rect width="{width}" height="{height}" fill="#020304"/><rect width="{width}" height="{height}" fill="url(#bg)"/>',
-        '<g fill="none" stroke="#6f6c66" stroke-width=".55" opacity=".32"><ellipse cx="500" cy="135" rx="230" ry="56" transform="rotate(-12 500 135)"/><ellipse cx="500" cy="135" rx="228" ry="57" transform="rotate(14 500 135)"/></g>',
-        '<g fill="#a7a39b" opacity=".66">'
-    ]
-    random_value = rng(33)
-    for _ in range(110):
-        x, y = random_value()*width, random_value()*height
-        if 360 < x < 640 and 10 < y < 275:
-            continue
-        radius = 0.45+random_value()*0.65
-        opacity = 0.18+random_value()*0.5
-        svg.append(f'<circle cx="{x:.1f}" cy="{y:.1f}" r="{radius:.2f}" opacity="{opacity:.2f}"/>')
-    svg.append('</g>')
-    svg.append('<ellipse cx="500" cy="145" rx="230" ry="75" transform="rotate(-15 500 145)" fill="none" stroke="#aaa69d" stroke-opacity=".25" stroke-width=".7"/>')
-    svg.append(f'<g transform="translate({center_x} {center_y})"><animate attributeName="opacity" values=".94;1;.94" dur="8s" repeatCount="indefinite"/>')
-
+def build_svg(points):
+    out=['<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="520" viewBox="0 0 1200 520" role="img" aria-labelledby="title desc">',
+    '<title id="title">Fawaz Ahamed — animated particle portrait</title>',
+    '<desc id="desc">Photo-derived monochrome portrait with glasses, hair, beard and suit, in twenty-four gently turning depth layers, above pixel lettering.</desc>',
+    '<rect width="1200" height="520" fill="#000"/>']
+    r=np.random.default_rng(38)
+    out.append('<g fill="#e8e4da">')
+    for _ in range(95):
+        x,y=r.uniform(60,1140),r.uniform(25,465)
+        if 350<x<870 and y<435: continue
+        out.append(f'<circle cx="{x:.1f}" cy="{y:.1f}" r="{r.uniform(.3,.9):.2f}" opacity="{r.uniform(.15,.55):.2f}"/>')
+    out.append('</g>')
+    # Sparse orbital paths behind the portrait; no visual UI decorations.
+    for angle,rx,ry,dur in [(-13,435,92,32),(12,370,113,39)]:
+        out.append(f'<g transform="translate(600 235) rotate({angle})"><ellipse rx="{rx}" ry="{ry}" fill="none" stroke="#e8e4da" stroke-width=".55" opacity=".2"/>')
+        for j in range(65):
+            a=2*math.pi*j/65
+            out.append(f'<circle cx="{rx*math.cos(a):.1f}" cy="{ry*math.sin(a):.1f}" r=".65" fill="{INK}" opacity=".4"/>')
+        out.append(f'<g><animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="{dur}s" repeatCount="indefinite"/><circle cx="{rx}" cy="0" r="2.1" fill="{INK}"/></g></g>')
+    out.append('<g transform="translate(600 10)">')
+    zmin,zmax=min(p[2] for p in points),max(p[2] for p in points)
     for k in range(LAYERS):
-        translations = ";".join(f"{layer_centers[k]*math.sin(angle)*scale:.1f} 0" for angle in yaws)
-        scales = ";".join(f"{math.cos(angle):.4f} 1" for angle in yaws)
-        svg.append(
-            f'<g><animateTransform attributeName="transform" type="translate" values="{translations}" keyTimes="{key_times}" dur="{DURATION}s" repeatCount="indefinite"/>'
-            f'<g><animateTransform attributeName="transform" type="scale" values="{scales}" keyTimes="{key_times}" dur="{DURATION}s" repeatCount="indefinite"/>'
-        )
-        layer_indices = [i for i,p in enumerate(points) if layer(p[2]) == k]
-        segments = [
-            f'M{points[i][0]*scale:.0f} {-points[i][1]*scale:.0f}L{points[j][0]*scale:.0f} {-points[j][1]*scale:.0f}'
-            for i,j in edges if layer((points[i][2]+points[j][2])*0.5) == k
-        ]
-        if segments:
-            svg.append(f'<path d="{"".join(segments)}" stroke="{INK}" stroke-opacity=".15" stroke-width=".5"/>')
-        for cutoff,color,opacity,radius in [
-            (0.45,"#aaa79f",0.52,0.8),
-            (0.72,"#d6d2c9",0.76,1.05),
-            (1.01,"#fffdf5",0.96,1.3),
-        ]:
-            dots = []
-            for i in layer_indices:
-                x,y,z,tone = points[i]
-                if cutoff == 0.45 and tone >= 0.45:
-                    continue
-                if cutoff == 0.72 and not (0.45 <= tone < 0.72):
-                    continue
-                if cutoff == 1.01 and tone < 0.72:
-                    continue
-                dots.append(f'<circle cx="{x*scale:.1f}" cy="{-y*scale:.1f}" r="{radius}" fill="{color}" fill-opacity="{opacity:.2f}"/>')
-            svg.extend(dots)
-        svg.append('</g></g>')
-    svg.append('</g>')
-
-    cell = 5.8
-    title_width = len("FAWAZ AHAMED")*(5*cell+cell*0.58)-cell*0.58
-    svg.append(pixel_title("FAWAZ AHAMED",(width-title_width)/2,278,cell))
-    svg.append(f'<text x="{width/2}" y="342" text-anchor="middle" font-family="monospace" font-size="12.5" fill="{SOFT}" letter-spacing="3">COMPUTER SCIENCE  ·  APPLIED AI  ·  SYMMET</text>')
-    svg.append('<g fill="none" stroke="#9a968e" stroke-width=".7" stroke-opacity=".5"><path d="M385 359h62M553 359h62"/><path d="M490 354v10M500 354v10M510 354v10"/></g>')
-    svg.append('</svg>')
-    return "".join(svg)
+        layer=[p for p in points if min(LAYERS-1,int((p[2]-zmin)/(zmax-zmin)*LAYERS))==k]
+        depth=zmin+(k+.5)*(zmax-zmin)/LAYERS
+        ts=[i/48 for i in range(49)]
+        yaw=[.16*math.sin(2*math.pi*t)**3 for t in ts]
+        kt=';'.join(f'{t:.5f}' for t in ts)
+        tv=';'.join(f'{depth*math.sin(a):.2f} 0' for a in yaw)
+        sv=';'.join(f'{math.cos(a):.5f} 1' for a in yaw)
+        out.append(f'<g><animateTransform attributeName="transform" type="translate" values="{tv}" keyTimes="{kt}" dur="14s" repeatCount="indefinite"/><g><animateTransform attributeName="transform" type="scale" values="{sv}" keyTimes="{kt}" dur="14s" repeatCount="indefinite"/>')
+        # Each layer owns its geometry, so links move with their endpoints.
+        from scipy.spatial import cKDTree
+        jacket=[p for p in layer if p[1]>275 or p[1]<95]
+        if len(jacket)>1:
+            pairs=sorted(cKDTree([(p[0],p[1]) for p in jacket]).query_pairs(4.5))
+            seg=''.join(f'M{jacket[i][0]:.1f} {jacket[i][1]:.1f}L{jacket[j][0]:.1f} {jacket[j][1]:.1f}' for i,j in pairs[::2])
+            out.append(f'<path d="{seg}" fill="none" stroke="{INK}" stroke-opacity=".18" stroke-width=".45"/>')
+        # Batch equal-tone dots as round-capped paths: far fewer DOM elements.
+        for band in range(12):
+            dots=[p for p in layer if min(11,int(p[3]*12))==band]
+            if not dots: continue
+            t=(band+.5)/12
+            radius=.38+.57*math.sqrt(t)
+            opacity=.5+.48*math.sqrt(t)
+            d=''.join(f'M{x:.2f} {y:.2f}h.01' for x,y,*_ in dots)
+            out.append(f'<path d="{d}" fill="none" stroke="{INK}" stroke-width="{2*radius:.2f}" stroke-linecap="round" opacity="{opacity:.2f}"/>')
+        out.append('</g></g>')
+    out.append('</g>')
+    # Mask the fading torso under the title with solid black.
+    out.append('<rect y="438" width="1200" height="82" fill="#000"/>')
+    cell=12.0
+    tw=len('FAWAZ AHAMED')*(5.58*cell)-.58*cell
+    out.append(pixel_title('FAWAZ AHAMED',(1200-tw)/2,426,cell))
+    out.append('</svg>')
+    return ''.join(out)
 
 
 def main():
-    if not os.path.isfile(SOURCE):
-        raise FileNotFoundError(f"Missing portrait source: {SOURCE}")
-    portrait = cutout(SOURCE)
-    points, edges = sample_points(portrait)
-    banner = build_svg(points, edges)
-    with open(OUTPUT,"w",encoding="utf-8") as file:
-        file.write(banner)
-    print(f"Generated {OUTPUT}: {len(points)} particles, {len(edges)} links, {len(banner):,} characters")
+    image=cutout()
+    image.save(ROOT/'assets/fawaz-cutout.png')
+    points=sample(image)
+    OUTPUT.write_text(build_svg(points))
+    print(f'{len(points):,} particles, {LAYERS} depth layers, {OUTPUT.stat().st_size:,} bytes')
 
-
-if __name__ == "__main__":
-    main()
+if __name__=='__main__': main()
