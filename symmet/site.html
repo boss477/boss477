@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en" rtrvr-gl-keydown="1" rtrvr-gl-input="1" rtrvr-gl-click="1" data-layout="vertical" rtrvr-mw-ready="1" rtrvr-ls="5~hs,6~hs,8~hs,9~hs" rtrvr-mw-busy="0"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Symmet Studio - Design it. See it. Quote it.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+
+<style>
+:root{--bg:#FAFAF0;--ink:#1C2739;--mut:#657080;--line:#DEDCD0;--acc:#C5A65B;--acc2:#969BA3;--card:#F2F1E6}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--ink);font-family:'Lora',serif;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+.serif{font-family:'Lora',serif;font-weight:400}
+nav{position:fixed;top:0;left:0;right:0;z-index:50;display:flex;justify-content:space-between;align-items:center;padding:18px 5vw;backdrop-filter:blur(14px);background:rgba(250,250,240,.85);border-bottom:1px solid var(--line)}
+.logo{font-weight:600;letter-spacing:.02em;font-size:18px}.logo span{color:var(--acc)}
+nav ul{display:flex;gap:32px;list-style:none;font-size:14px;color:var(--mut)}nav ul a:hover{color:var(--ink)}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:12px 22px;border-radius:999px;font-size:14px;font-weight:500;transition:.3s}
+.btn-p{background:var(--ink);color:var(--bg)}.btn-p:hover{background:var(--acc)}
+.btn-g{border:1px solid var(--line)}.btn-g:hover{border-color:var(--ink)}
+/* hero */
+.hero{position:relative;height:100vh;min-height:720px;overflow:hidden}
+#scene{position:absolute;inset:0}
+.hero-c{position:relative;z-index:2;height:100%;display:flex;flex-direction:column;justify-content:center;padding:0 5vw;pointer-events:none}
+.hero-c>*{pointer-events:auto}
+.tag{display:inline-flex;gap:8px;align-items:center;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--acc);margin-bottom:24px}
+.tag:before{content:"";width:8px;height:8px;border-radius:50%;background:var(--acc);box-shadow:0 0 12px var(--acc);animation:pulse 2s infinite}
+@keyframes pulse{50%{opacity:.3}}
+h1{font-size:clamp(48px,8vw,124px);line-height:.95;letter-spacing:-.03em;font-weight:500;max-width:11ch}
+h1 em{font-family:'Lora',serif;font-style:italic;color:var(--acc);font-weight:400}
+.hero p{max-width:440px;color:var(--mut);font-size:17px;line-height:1.6;margin:28px 0 36px}
+.hero .ctas{display:flex;gap:12px}
+.word{display:inline-block;overflow:hidden;vertical-align:top}.word span{display:inline-block;transform:translateY(110%);animation:up 1s cubic-bezier(.2,.8,.2,1) forwards}
+@keyframes up{to{transform:none}}
+.hud{position:absolute;right:5vw;bottom:6vh;z-index:3;display:flex;gap:8px;background:rgba(250,250,240,.9);backdrop-filter:blur(10px);border:1px solid var(--line);border-radius:999px;padding:6px}
+.hud button{background:none;border:0;color:var(--mut);font:600 13px Syne;padding:9px 16px;border-radius:999px;cursor:pointer}
+.hud button.on{background:var(--ink);color:var(--bg)}
+.price{position:absolute;right:5vw;top:18vh;z-index:3;background:#1C2739;color:#FAFAF0;backdrop-filter:blur(12px);border:1px solid var(--line);border-radius:16px;padding:18px 20px;width:250px;font-size:13px}
+.price h4{font-weight:500;color:var(--mut);font-size:11px;letter-spacing:.12em;text-transform:uppercase;margin-bottom:12px}
+.price .r{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #354051}.price h4{color:#969BA3!important}
+.price .t{display:flex;justify-content:space-between;padding-top:12px;font-size:16px;font-weight:600}.price .t b{color:var(--acc)}
+.scroll{position:absolute;left:50%;bottom:28px;z-index:3;transform:translateX(-50%);font-size:11px;letter-spacing:.2em;color:var(--mut)}
+/* marquee */
+.marq{border-block:1px solid var(--line);overflow:hidden;padding:22px 0;white-space:nowrap}
+.marq div{display:inline-block;animation:mq 30s linear infinite;font-size:22px;color:var(--mut)}
+.marq span{margin:0 28px}.marq i{color:var(--acc);font-style:normal}
+@keyframes mq{to{transform:translateX(-50%)}}
+section{padding:140px 5vw}
+.eyebrow{font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--mut);margin-bottom:20px}
+h2{font-size:clamp(36px,5vw,72px);line-height:1;letter-spacing:-.025em;font-weight:500;max-width:16ch}
+h2 em{font-family:'Lora',serif;font-style:italic;font-weight:400;color:var(--acc)}
+.rv{opacity:0;transform:translateY(40px);transition:1s cubic-bezier(.2,.8,.2,1)}.rv.in{opacity:1;transform:none}
+/* steps sticky */
+.steps{display:grid;grid-template-columns:1fr 1fr;gap:6vw;margin-top:80px}
+.stick{position:sticky;top:120px;height:70vh;border-radius:24px;overflow:hidden;background:var(--card);border:1px solid var(--line)}
+.stick .pane{position:absolute;inset:0;opacity:0;transition:opacity .7s, transform .7s;transform:scale(1.04);display:flex;align-items:center;justify-content:center}
+.stick .pane.on{opacity:1;transform:none}
+.step{min-height:70vh;display:flex;flex-direction:column;justify-content:center;border-top:1px solid var(--line);opacity:.3;transition:.5s}
+.step.on{opacity:1}
+.step .n{font-family:'Lora';font-size:20px;color:var(--acc);margin-bottom:16px}
+.step h3{font-size:40px;font-weight:500;letter-spacing:-.02em;margin-bottom:16px}
+.step p{color:var(--mut);line-height:1.7;max-width:420px}
+.step ul{margin-top:20px;list-style:none;display:flex;flex-wrap:wrap;gap:8px}
+.step li{font-size:12px;border:1px solid var(--line);padding:6px 12px;border-radius:999px;color:var(--mut)}
+/* svg panes */
+.plan rect,.plan line,.plan path{fill:none;stroke:var(--ink);stroke-width:2;stroke-dasharray:1200;stroke-dashoffset:1200}
+.pane.on .plan *{animation:draw 2.5s ease forwards}
+@keyframes draw{to{stroke-dashoffset:0}}
+.cat{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;padding:28px;width:100%}
+.cat div{aspect-ratio:1;border-radius:14px;background:linear-gradient(160deg,#FAFAF0,#ECEADD);border:1px solid var(--line);padding:12px;font-size:11px;color:var(--mut);display:flex;flex-direction:column;justify-content:flex-end;transform:translateY(20px);opacity:0}
+.pane.on .cat div{animation:pop .6s forwards}
+.cat div:nth-child(2){animation-delay:.08s!important}.cat div:nth-child(3){animation-delay:.16s!important}.cat div:nth-child(4){animation-delay:.24s!important}.cat div:nth-child(5){animation-delay:.32s!important}.cat div:nth-child(6){animation-delay:.4s!important}
+.cat b{color:var(--ink);font-weight:500;font-size:13px}
+@keyframes pop{to{transform:none;opacity:1}}
+.iso{width:70%;animation:spin 14s linear infinite}
+@keyframes spin{0%{transform:rotateY(0) rotateX(55deg) rotateZ(45deg)}100%{transform:rotateY(0) rotateX(55deg) rotateZ(405deg)}}
+.isoW{perspective:900px}
+.quote{width:80%;background:#1C2739;color:#FAFAF0;border-radius:12px;padding:24px;font-size:13px;box-shadow:0 30px 80px rgba(0,0,0,.5)}
+.quote h5{font-size:16px;margin-bottom:14px;display:flex;justify-content:space-between}
+.quote .r{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #354051}
+.quote .t{font-weight:600;font-size:18px;padding-top:12px;display:flex;justify-content:space-between}
+/* bento */
+.bento{display:grid;grid-template-columns:repeat(4,1fr);grid-auto-rows:260px;gap:16px;margin-top:70px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:28px;position:relative;overflow:hidden;transition:.4s}
+.card:hover{border-color:rgba(197,166,91,.7);transform:translateY(-4px)}
+.card h4{font-size:22px;font-weight:500;letter-spacing:-.01em;margin-bottom:8px}
+.card p{color:var(--mut);font-size:14px;line-height:1.6;max-width:32ch}
+.c2{grid-column:span 2}.r2{grid-row:span 2}
+.glow{position:absolute;width:300px;height:300px;border-radius:50%;background:radial-gradient(var(--acc),transparent 60%);opacity:.18;right:-80px;bottom:-80px;filter:blur(20px)}
+.sun{position:absolute;right:30px;bottom:30px;width:120px;height:120px;border-radius:50%;background:conic-gradient(from 0deg,#C5A65B,#FAFAF0,#1C2739,#C5A65B);animation:spin2 8s linear infinite;filter:blur(1px)}
+@keyframes spin2{to{transform:rotate(360deg)}}
+.chips{position:absolute;left:28px;right:28px;bottom:28px;display:flex;flex-wrap:wrap;gap:8px}
+.chips span{font-size:12px;border:1px solid var(--line);padding:6px 11px;border-radius:8px;font-family:monospace;color:var(--ink)}
+.bars{position:absolute;left:28px;right:28px;bottom:28px;display:flex;align-items:flex-end;gap:6px;height:90px}
+.bars i{flex:1;background:linear-gradient(var(--acc),transparent);border-radius:4px 4px 0 0;animation:bar 2.4s ease-in-out infinite alternate}
+@keyframes bar{from{height:20%}to{height:100%}}
+/* who */
+.who{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:70px}
+.who .card{height:420px;display:flex;flex-direction:column;justify-content:flex-end}
+.who .bg{position:absolute;inset:0;opacity:.55;transition:.6s}
+.who .card:hover .bg{transform:scale(1.06);opacity:.8}
+.who .card>*:not(.bg){position:relative}
+/* factory */
+.fac{display:grid;grid-template-columns:1.1fr 1fr;gap:6vw;align-items:center}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line);border:1px solid var(--line);border-radius:22px;overflow:hidden}
+.stats div{background:var(--bg);padding:34px}
+.stats b{display:block;font-size:48px;font-weight:500;letter-spacing:-.03em}
+.stats span{color:var(--mut);font-size:13px}
+.cta{text-align:center;padding:180px 5vw;position:relative;overflow:hidden}
+.cta h2{margin:0 auto 36px;max-width:14ch;font-size:clamp(44px,7vw,110px)}
+.orb{position:absolute;left:50%;top:50%;width:700px;height:700px;transform:translate(-50%,-50%);background:radial-gradient(circle,rgba(197,166,91,.25),transparent 60%);animation:breathe 6s ease-in-out infinite}
+@keyframes breathe{50%{transform:translate(-50%,-50%) scale(1.15)}}
+footer{border-top:1px solid var(--line);padding:40px 5vw;display:flex;justify-content:space-between;color:var(--mut);font-size:13px}
+.cursor{position:fixed;width:300px;height:300px;border-radius:50%;pointer-events:none;background:radial-gradient(rgba(197,166,91,.12),transparent 60%);transform:translate(-50%,-50%);z-index:1}
+@media(max-width:900px){nav ul{display:none}.steps,.fac{grid-template-columns:1fr}.stick{display:none}.bento,.who{grid-template-columns:1fr}.c2,.r2{grid-column:auto;grid-row:auto}.price{display:none}}
+h1,h2,h3,h4,.logo,.btn,nav,.step h3{font-family:Syne,sans-serif}h1 em,h2 em{font-family:Lora,serif}.stats{background:#1C2739}.stats div{background:#1C2739;color:#FAFAF0}.stats span{color:#969BA3}#factory{background:#1C2739;color:#FAFAF0}#factory p{color:#969BA3!important}.cat div{color:var(--mut)}.who .card,.card{box-shadow:none}</style>
+
+
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Syne:wght@500;600;700;800&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" />
+</head>
+<body rtrvr-ls="5~hs,6~hs,8~hs,9~hs" class="">
+<div class="cursor" id="cur" style="left: 787px; top: 345px;"></div>
+<nav rtrvr-ls="5~hs,6~hs,8~hs,9~hs">
+  <a class="logo" href="#">symmet<span>.</span>studio</a>
+  <ul rtrvr-ls="5~hs,6~hs,8~hs,9~hs"><li><a href="#how">How it works</a></li><li rtrvr-ls="5~hs,6~hs,8~hs,9~hs"><a href="#features" rtrvr-ls="5~hs,6~hs,8~hs,9~hs" rtrvr-ro="50">Features</a></li><li><a href="#who">Who it's for</a></li><li><a href="#factory">Factory</a></li></ul>
+  <a class="btn btn-p" href="#start" rtrvr-ls="5~hs,6~hs,8~hs,9~hs" rtrvr-ro="50">Book a demo</a>
+</nav>
+
+<header class="hero" rtrvr-ls="5~hs,6~hs,8~hs,9~hs">
+  <canvas id="scene"></canvas>
+  <div class="hero-c" rtrvr-ls="5~hs,6~hs,8~hs,9~hs">
+    <div class="tag" rtrvr-ls="5~hs,6~hs,8~hs,9~hs">Floor plan to factory quote</div>
+    <h1 rtrvr-ls="5~hs,6~hs,8~hs,9~hs,49~hs"><span class="word" rtrvr-ls="5~hs,6~hs,8~hs,9~hs"><span rtrvr-ls="5~hs,6~hs,8~hs,9~hs">Design&nbsp;it.</span></span><br><span class="word" rtrvr-ls="5~hs,6~hs,8~hs,9~hs"><span style="animation-delay:.12s" rtrvr-ls="5~hs,6~hs,8~hs,9~hs">See&nbsp;it.</span></span><br><span class="word"><span style="animation-delay:.24s"><em>Quote&nbsp;it.</em></span></span></h1>
+    <p rtrvr-ls="5~hs,6~hs,8~hs,9~hs">Draw the room, drop in real furniture, walk through it in 3D and send a GST-ready quote. Every piece is built in our own factory in IMT Manesar.</p>
+    <div class="ctas" rtrvr-ls="5~hs,6~hs,8~hs,9~hs"><a class="btn btn-p" href="#start">Start designing</a><a class="btn btn-g" href="#how" rtrvr-ls="5~hs,6~hs,8~hs,9~hs" rtrvr-ro="50">See how it works</a></div>
+  </div>
+  <div class="price" rtrvr-ls="5~hs,6~hs,8~hs,9~hs">
+    <h4 rtrvr-ls="5~hs,6~hs,8~hs,9~hs">Live quote</h4>
+    <div class="r" rtrvr-ls="5~hs,6~hs,8~hs,9~hs"><span>IVY lounge chair x2</span><span>Rs 56,000</span></div>
+    <div class="r" rtrvr-ls="5~hs,6~hs,8~hs,9~hs"><span>Oak dining set</span><span rtrvr-ls="5~hs,6~hs,8~hs,9~hs">Rs 84,500</span></div>
+    <div class="r" rtrvr-ls="5~hs,6~hs,8~hs,9~hs"><span rtrvr-ls="5~hs,6~hs,8~hs,9~hs">Freight + install</span><span>Rs 6,200</span></div>
+    <div class="r" rtrvr-ls="5~hs,6~hs,8~hs,9~hs"><span>GST 18%</span><span>Rs 26,397</span></div>
+    <div class="t" rtrvr-ls="5~hs,6~hs,8~hs,9~hs"><span>Total</span><b>Rs 1,73,097</b></div>
+  </div>
+  <div class="hud" rtrvr-ls="0~hs,5~hs,6~hs,8~hs,9~hs,23~hs,24~hs"><button class="on" data-v="orbit" rtrvr-ls="5~hs,6~hs,8~hs,9~hs" rtrvr-ro="38">Dollhouse</button><button data-v="top" rtrvr-ls="0~hs,5~hs,6~hs,8~hs,9~hs,23~hs,24~hs" rtrvr-ro="38">Top view</button><button data-v="walk" rtrvr-ls="0~hs,5~hs,6~hs,8~hs,9~hs,23~hs,24~hs" rtrvr-ro="38">Walk</button><button data-v="dusk" rtrvr-ls="0~hs,5~hs,6~hs,8~hs,9~hs,23~hs,24~hs" rtrvr-ro="38">Dusk light</button></div>
+  <div class="scroll">SCROLL</div>
+</header>
+
+<div class="marq" rtrvr-ls="5~hs,6~hs,8~hs,9~hs"><div>
+<span>BOQ <i>.xlsx</i></span><span>Proforma invoice <i>.pdf</i></span><span>Revit</span><span>IFC4</span><span>STEP</span><span>DXF</span><span>.glb / .dae</span><span>PPT deck</span><span>Share link</span><span>GST quote</span>
+<span>BOQ <i>.xlsx</i></span><span>Proforma invoice <i>.pdf</i></span><span>Revit</span><span>IFC4</span><span>STEP</span><span>DXF</span><span>.glb / .dae</span><span>PPT deck</span><span>Share link</span><span>GST quote</span>
+</div></div>
+
+<section id="how" rtrvr-ls="5~hs,6~hs,8~hs,9~hs,49~hs">
+  <div class="eyebrow rv in" rtrvr-ls="5~hs,6~hs,8~hs,9~hs">How it works</div>
+  <h2 class="rv in" rtrvr-ls="5~hs,6~hs,8~hs,9~hs">From an empty plan to a signed order in <em>one sitting.</em></h2>
+  <div class="steps" rtrvr-ls="5~hs,6~hs,8~hs,9~hs,49~hs">
+    <div class="stick">
+      <div class="pane" data-p="0">
+        <svg class="plan" viewBox="0 0 400 300" width="80%"><rect x="20" y="20" width="360" height="260"></rect><line x1="200" y1="20" x2="200" y2="170"></line><line x1="20" y1="170" x2="140" y2="170"></line><line x1="260" y1="170" x2="380" y2="170"></line><path d="M200 170 A40 40 0 0 1 240 130"></path><rect x="60" y="200" width="90" height="50"></rect><rect x="250" y="40" width="110" height="70"></rect><rect x="40" y="40" width="60" height="100"></rect></svg>
+      </div>
+      <div class="pane" data-p="1">
+        <div class="cat"><div><b>IVY chair</b>Rs 28,000 · 72x78x84</div><div><b>Arc sofa 3S</b>Rs 92,000</div><div><b>Oak table</b>Rs 54,500</div><div><b>Linen bed</b>Rs 71,000</div><div><b>Wardrobe 3D</b>Rs 88,000</div><div><b>Pooja unit</b>Rs 39,000</div></div>
+      </div>
+      <div class="pane isoW" data-p="2">
+        <svg class="iso" viewBox="0 0 200 200"><rect x="20" y="20" width="160" height="160" fill="#F2F1E6" stroke="#1C2739"></rect><rect x="40" y="110" width="60" height="50" fill="#C5A65B" opacity=".85"></rect><rect x="120" y="40" width="40" height="70" fill="#1C2739" opacity=".85"></rect><circle cx="140" cy="140" r="14" fill="#969BA3"></circle><rect x="40" y="40" width="50" height="30" fill="#969BA3" opacity=".6"></rect></svg>
+      </div>
+      <div class="pane on" data-p="3">
+        <div class="quote"><h5><span>Proforma Invoice</span><span style="color:#999">Sample</span></h5>
+          <div class="r"><span>Arc sofa 3S x1</span><span>92,000</span></div><div class="r"><span>Oak table x1</span><span>54,500</span></div><div class="r"><span>Installation</span><span>4,000</span></div><div class="r"><span>GST 18%</span><span>27,090</span></div>
+          <div class="t"><span>Total</span><span>Rs 1,77,590</span></div></div>
+      </div>
+    </div>
+    <div rtrvr-ls="5~hs,6~hs,8~hs,9~hs">
+      <div class="step" data-s="0" rtrvr-ls="5~hs,6~hs,8~hs,9~hs,49~hs"><div class="n" rtrvr-ls="5~hs,6~hs,8~hs,9~hs">01</div><h3 rtrvr-ls="5~hs,6~hs,8~hs,9~hs">Plan</h3><p rtrvr-ls="5~hs,6~hs,8~hs,9~hs">Draw rooms, walls, doors and windows to scale, or start from a preset like a pooja room or wardrobe wall.</p><ul rtrvr-ls="5~hs,6~hs,8~hs,9~hs"><li rtrvr-ls="5~hs,6~hs,8~hs,9~hs">Walls &amp; openings</li><li>Presets</li><li>Flooring</li><li>Units &amp; scale</li></ul></div>
+      <div class="step" data-s="1" rtrvr-ls="5~hs,6~hs,8~hs,9~hs"><div class="n" rtrvr-ls="5~hs,6~hs,8~hs,9~hs">02</div><h3 rtrvr-ls="5~hs,6~hs,8~hs,9~hs">Furnish</h3><p rtrvr-ls="5~hs,6~hs,8~hs,9~hs">Drop in real Symmet pieces with SKUs, true dimensions and live pricing that updates as you design.</p><ul rtrvr-ls="5~hs,6~hs,8~hs,9~hs"><li>Real SKUs</li><li rtrvr-ls="5~hs,6~hs,8~hs,9~hs,49~hs">True dimensions</li><li>Live pricing</li></ul></div>
+      <div class="step" data-s="2" rtrvr-ls="5~hs,6~hs,8~hs,9~hs"><div class="n" rtrvr-ls="5~hs,6~hs,8~hs,9~hs">03</div><h3 rtrvr-ls="5~hs,6~hs,8~hs,9~hs">See it in 3D</h3><p rtrvr-ls="5~hs,6~hs,8~hs,9~hs,49~hs">Switch to dollhouse, top or walk view. Check clearances, change paint and preview daylight.</p><ul rtrvr-ls="5~hs,6~hs,8~hs,9~hs"><li>Dollhouse</li><li rtrvr-ls="5~hs,6~hs,8~hs,9~hs">Walk view</li><li>Clearance</li><li>Daylight</li></ul></div>
+      <div class="step on" data-s="3" rtrvr-ls="5~hs,6~hs,8~hs,9~hs"><div class="n" rtrvr-ls="5~hs,6~hs,8~hs,9~hs,49~hs">04</div><h3 rtrvr-ls="5~hs,6~hs,8~hs,9~hs">Quote &amp; order</h3><p rtrvr-ls="5~hs,6~hs,8~hs,9~hs">Get a takeoff, RFQ, proforma invoice and GST quote with freight and installation, then share one link with your client.</p><ul rtrvr-ls="5~hs,6~hs,8~hs,9~hs"><li>BOQ</li><li>PI</li><li rtrvr-ls="5~hs,6~hs,8~hs,9~hs">GST</li><li>Share link</li></ul></div>
+    </div>
+  </div>
+</section>
+
+<section id="features" rtrvr-ls="5~hs,6~hs,8~hs,9~hs">
+  <div class="eyebrow rv in" rtrvr-ls="5~hs,6~hs,8~hs,9~hs">Features</div>
+  <h2 class="rv in" rtrvr-ls="5~hs,6~hs,8~hs,9~hs,49~hs">Built for people who sell <em>space</em>, not software.</h2>
+  <div class="bento" rtrvr-ls="5~hs,6~hs,8~hs,9~hs">
+    <div class="card c2 r2 rv in" rtrvr-ls="5~hs,6~hs,8~hs,9~hs"><h4 rtrvr-ls="5~hs,6~hs,8~hs,9~hs">Walk your client through it</h4><p rtrvr-ls="5~hs,6~hs,8~hs,9~hs">Dollhouse, top and walk views in the browser. No install and no render farm.</p><div class="glow"></div><canvas id="mini" style="position:absolute;left:0;right:0;bottom:0;width:100%;height:60%" rtrvr-ls="5~hs,6~hs,8~hs,9~hs,49~hs"></canvas></div>
+    <div class="card rv in" rtrvr-ls="5~hs,6~hs,8~hs,9~hs"><h4 rtrvr-ls="5~hs,6~hs,8~hs,9~hs">Live pricing</h4><p rtrvr-ls="5~hs,6~hs,8~hs,9~hs">Every change updates the quote.</p><div class="bars" rtrvr-ls="5~hs,6~hs,8~hs,9~hs"><i rtrvr-ls="5~hs,6~hs,8~hs,9~hs"></i><i style="animation-delay:.2s" rtrvr-ls="5~hs,6~hs,8~hs,9~hs"></i><i style="animation-delay:.4s" rtrvr-ls="5~hs,6~hs,8~hs,9~hs"></i><i style="animation-delay:.6s" rtrvr-ls="5~hs,6~hs,8~hs,9~hs"></i><i style="animation-delay:.8s" rtrvr-ls="5~hs,6~hs,8~hs,9~hs"></i><i style="animation-delay:1s" rtrvr-ls="5~hs,6~hs,8~hs,9~hs"></i></div></div>
+    <div class="card rv in" rtrvr-ls="0~hs,5~hs,6~hs,8~hs,9~hs"><h4>Daylight &amp; paint</h4><p>See the room at 9am and at dusk.</p><div class="sun" rtrvr-ls="0~hs,5~hs,6~hs,8~hs,9~hs"></div></div>
+    <div class="card c2 rv in" rtrvr-ls="5~hs,6~hs,8~hs,9~hs"><h4 rtrvr-ls="5~hs,6~hs,8~hs,9~hs">Exports your team already uses</h4><p rtrvr-ls="5~hs,8~hs">Hand off to architects, the factory or finance without retyping anything.</p><div class="chips" rtrvr-ls="0~hs,5~hs,6~hs,8~hs,9~hs"><span rtrvr-ls="5~hs,6~hs,8~hs,9~hs">BOQ.xlsx</span><span>PI.pdf</span><span rtrvr-ls="5~hs,6~hs,8~hs,9~hs">deck.ppt</span><span rtrvr-ls="5~hs,6~hs,8~hs,9~hs">.glb</span><span rtrvr-ls="5~hs,6~hs,8~hs,9~hs">IFC4</span><span rtrvr-ls="5~hs,6~hs,8~hs,9~hs">STEP</span><span rtrvr-ls="0~hs,5~hs,6~hs,8~hs,9~hs">DXF</span><span>Revit</span></div></div>
+  </div>
+</section>
+
+<section id="who" rtrvr-ls="5~hs,6~hs,8~hs,9~hs,49~hs">
+  <div class="eyebrow rv in" rtrvr-ls="5~hs,6~hs,8~hs,9~hs">Who it's for</div>
+  <h2 class="rv in" rtrvr-ls="5~hs,6~hs,8~hs,9~hs">One tool, <em>three tables.</em></h2>
+  <div class="who" rtrvr-ls="5~hs,6~hs,8~hs,9~hs">
+    <div class="card rv in" rtrvr-ls="5~hs,6~hs,8~hs,9~hs"><div class="bg" style="background:radial-gradient(circle at 30% 20%,#C5A65B55,transparent 60%)" rtrvr-ls="5~hs,6~hs,8~hs,9~hs,49~hs"></div><div class="eyebrow">Showrooms</div><h4>Close on the floor</h4><p>Show buyers their own room with your stock in it and quote before they leave.</p></div>
+    <div class="card rv in" rtrvr-ls="5~hs,6~hs,8~hs,9~hs"><div class="bg" style="background:radial-gradient(circle at 70% 20%,#1C273922,transparent 60%)" rtrvr-ls="5~hs,6~hs,8~hs,9~hs"></div><div class="eyebrow" rtrvr-ls="5~hs,6~hs,8~hs,9~hs">Architects &amp; designers</div><h4>Spec to BOQ in minutes</h4><p>Export IFC, DXF or Revit and get factory pricing for custom FF&amp;E.</p></div>
+    <div class="card rv in" rtrvr-ls="5~hs,6~hs,8~hs,9~hs"><div class="bg" style="background:radial-gradient(circle at 50% 10%,#C5A65B33,transparent 60%)" rtrvr-ls="5~hs,6~hs,8~hs,9~hs"></div><div class="eyebrow">Fit-out &amp; hospitality</div><h4>Room packs at scale</h4><p>Design one room type, then quote and build it for every key.</p></div>
+  </div>
+</section>
+
+<section id="factory" rtrvr-ls="5~hs,6~hs,8~hs,9~hs,49~hs">
+  <div class="fac" rtrvr-ls="5~hs,6~hs,8~hs,9~hs">
+    <div rtrvr-ls="5~hs,6~hs,8~hs,9~hs"><div class="eyebrow rv in">Made by Symmet</div><h2 class="rv in" rtrvr-ls="5~hs,6~hs,8~hs,9~hs,49~hs">What you design is what <em rtrvr-ls="5~hs,6~hs,8~hs,9~hs">our factory builds.</em></h2><p class="rv in" style="color:var(--mut);line-height:1.7;margin-top:24px;max-width:460px" rtrvr-ls="5~hs,6~hs,8~hs,9~hs">CNC, metal fabrication, finishing, upholstery and multi-stage QA under one roof in IMT Manesar, Haryana. No middlemen between the render and the real piece.</p></div>
+    <div class="stats rv in"><div><b>QA</b><span>at multiple stages</span></div><div><b>CNC</b><span>precision cutting</span></div><div><b data-c="1">1</b><span>roof, end to end</span></div><div><b data-c="8">8</b><span>export formats</span></div></div>
+  </div>
+</section>
+
+<div class="cta" id="start" rtrvr-ls="5~hs,6~hs,8~hs,9~hs">
+  <div class="orb" rtrvr-ls="5~hs,6~hs,8~hs,9~hs,49~hs"></div>
+  <h2 class="rv in" style="position:relative" rtrvr-ls="5~hs,6~hs,8~hs,9~hs">Your next room is <em rtrvr-ls="5~hs,6~hs,8~hs,9~hs,49~hs">one link away.</em></h2>
+  <div style="position:relative;display:flex;gap:12px;justify-content:center"><a class="btn btn-p" href="mailto:sales@symmet.in">Book a demo</a><a class="btn btn-g" href="https://symmet.in/studio" target="_blank" rel="noopener noreferrer">Try Studio</a></div>
+</div>
+
+<footer><span>symmet.studio · IMT Manesar, Haryana</span><span>sales@symmet.in · +91 98183 81951</span></footer>
+
+<script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.160.0/build/three.module.js"}}</script>
+<script type="module">
+import * as THREE from 'three';
+function room(canvas,interactive){
+  const r=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true});
+  r.setPixelRatio(Math.min(devicePixelRatio,2));r.shadowMap.enabled=true;r.shadowMap.type=THREE.PCFSoftShadowMap;
+  const s=new THREE.Scene();if(interactive)s.fog=new THREE.Fog(0xFAFAF0,18,40);
+  const cam=new THREE.PerspectiveCamera(38,1,.1,100);
+  const amb=new THREE.HemisphereLight(0xfff3e0,0x1a1612,.7);s.add(amb);
+  const sun=new THREE.DirectionalLight(0xffe2b8,2.2);sun.position.set(6,10,4);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);
+  Object.assign(sun.shadow.camera,{left:-8,right:8,top:8,bottom:-8});s.add(sun);
+  const M=(c,ro=.8)=>new THREE.MeshStandardMaterial({color:c,roughness:ro});
+  const box=(w,h,d,m,x,y,z,g)=>{const o=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m);o.position.set(x,y,z);o.castShadow=o.receiveShadow=true;(g||s).add(o);return o};
+  const G=new THREE.Group();s.add(G);
+  box(10,.2,8,M(0x8a6a4a,.6),0,-.1,0,G);
+  const wall=M(0xe9e2d6);box(10,3.2,.2,wall,0,1.6,-4,G);box(.2,3.2,8,wall,-5,1.6,0,G);
+  const win=new THREE.Mesh(new THREE.PlaneGeometry(2.6,1.6),new THREE.MeshBasicMaterial({color:0xffe9c4}));win.position.set(-4.88,1.8,0);win.rotation.y=Math.PI/2;G.add(win);
+  box(3.4,.08,2.4,M(0xcfc3ad,1),0,.04,.8,G); // rug
+  const sofa=new THREE.Group();G.add(sofa);const fab=M(0x1C2739,.9);
+  box(3,.45,1,fab,0,.35,0,sofa);box(3,.7,.25,fab,0,.8,-.4,sofa);box(.25,.6,1,fab,-1.5,.55,0,sofa);box(.25,.6,1,fab,1.5,.55,0,sofa);sofa.position.set(0,0,-2.6);
+  box(1.4,.08,.8,M(0x3a2c20,.4),0,.45,.6,G);[[-.6,.3],[.6,.3],[-.6,.9],[.6,.9]].forEach(([x,z])=>box(.06,.42,.06,M(0x222),x,.21,z,G));
+  const ch=new THREE.Group();G.add(ch);const cm=M(0xC5A65B,.9);box(.8,.4,.8,cm,0,.35,0,ch);box(.8,.6,.15,cm,0,.75,-.35,ch);ch.position.set(2.4,0,.8);ch.rotation.y=-.7;
+  box(.6,2.2,1.6,M(0x5a4634,.5),4.4,1.1,-2.8,G);
+  const lamp=new THREE.Mesh(new THREE.SphereGeometry(.35,32,16),new THREE.MeshStandardMaterial({color:0xfff1d6,emissive:0xffc477,emissiveIntensity:1.6}));lamp.position.set(-3.5,2.2,-3);G.add(lamp);
+  box(.04,2,.04,M(0x222),-3.5,1.1,-3,G);const pl=new THREE.PointLight(0xffb966,8,7);pl.position.copy(lamp.position);G.add(pl);
+  const plant=new THREE.Mesh(new THREE.IcosahedronGeometry(.5,0),M(0x4f7a52));plant.position.set(-4.2,.9,2.8);plant.castShadow=true;G.add(plant);box(.5,.5,.5,M(0xbfae96),-4.2,.25,2.8,G);
+  let view='orbit',t=0,mx=0,my=0;const target=new THREE.Vector3(0,.8,0);
+  addEventListener('mousemove',e=>{mx=e.clientX/innerWidth-.5;my=e.clientY/innerHeight-.5});
+  function size(){const w=canvas.clientWidth,h=canvas.clientHeight;r.setSize(w,h,false);cam.aspect=w/h;cam.updateProjectionMatrix()}
+  addEventListener('resize',size);size();
+  const goal=new THREE.Vector3();
+  function tick(){t+=.004;
+    if(view==='orbit')goal.set(Math.sin(t)*13+mx*3,7-my*2,Math.cos(t)*13);
+    if(view==='top')goal.set(.01,18,.01);
+    if(view==='walk')goal.set(Math.sin(t*1.5)*2.5,1.6,3.2);
+    if(view==='dusk')goal.set(Math.sin(t)*12,5,Math.cos(t)*12);
+    cam.position.lerp(goal,.04);
+    target.set(interactive?-2.5:0,view==='walk'?1.2:.6,0);cam.lookAt(target);
+    sun.color.lerp(new THREE.Color(view==='dusk'?0xff7a3d:0xffe2b8),.05);sun.intensity+=((view==='dusk'?1:2.2)-sun.intensity)*.05;
+    r.render(s,cam);requestAnimationFrame(tick)}
+  tick();return v=>view=v;
+}
+const setView=room(document.getElementById('scene'),true);
+room(document.getElementById('mini'),false);
+document.querySelectorAll('.hud button').forEach(b=>b.onclick=()=>{document.querySelectorAll('.hud button').forEach(x=>x.classList.remove('on'));b.classList.add('on');setView(b.dataset.v)});
+</script>
+<script>
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');const c=e.target.querySelectorAll('[data-c]');c.forEach(n=>{let v=0,to=+n.dataset.c;const i=setInterval(()=>{n.textContent=++v;if(v>=to)clearInterval(i)},120)})}}),{threshold:.2});
+document.querySelectorAll('.rv').forEach(e=>io.observe(e));
+const so=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){const i=e.target.dataset.s;document.querySelectorAll('.step').forEach(s=>s.classList.toggle('on',s.dataset.s===i));document.querySelectorAll('.pane').forEach(p=>p.classList.toggle('on',p.dataset.p===i))}}),{rootMargin:'-45% 0px -45% 0px'});
+document.querySelectorAll('.step').forEach(s=>so.observe(s));
+const cur=document.getElementById('cur');addEventListener('mousemove',e=>{cur.style.left=e.clientX+'px';cur.style.top=e.clientY+'px'});
+</script>
+
+
+</body></html>
