@@ -1,7 +1,4 @@
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="assets/banner-dark.svg">
-  <img src="assets/banner.png" alt="Fawaz Ahamed" width="100%" />
-</picture>
+<img src="assets/banner-dark.svg" alt="Fawaz Ahamed animated point-cloud portrait" width="100%" />
 
 # Fawaz Ahamed
 
