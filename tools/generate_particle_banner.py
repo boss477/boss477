@@ -226,7 +226,7 @@ def build_svg(points, edges):
         '<defs><radialGradient id="bg"><stop stop-color="#101113"/><stop offset="1" stop-color="#020304"/></radialGradient></defs>',
         f'<rect width="{width}" height="{height}" fill="#020304"/><rect width="{width}" height="{height}" fill="url(#bg)"/>',
         '<g fill="none" stroke="#6f6c66" stroke-width=".55" opacity=".32"><ellipse cx="500" cy="135" rx="230" ry="56" transform="rotate(-12 500 135)"/><ellipse cx="500" cy="135" rx="228" ry="57" transform="rotate(14 500 135)"/></g>',
-        '<g fill="#a7a39b" opacity=".66>'
+        '<g fill="#a7a39b" opacity=".66">'
     ]
     random_value = rng(33)
     for _ in range(110):
