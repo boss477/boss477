@@ -34,5 +34,6 @@ jobs:
           git add assets/banner-dark.svg
           if ! git diff --cached --quiet; then
             git commit -m "Generate improved animated particle portrait"
+            git pull --rebase origin fix/particle-portrait-v2
             git push
           fi
