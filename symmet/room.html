@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" rtrvr-gl-keydown="1" rtrvr-gl-input="1" rtrvr-gl-click="1" data-layout="vertical" rtrvr-mw-ready="1" rtrvr-mw-busy="0" rtrvr-ls="0~hs,5~hs,6~hs,8~hs,9~hs,13~hs,23~hs,24~hs"><head>
+<html lang="en" rtrvr-gl-keydown="1" rtrvr-gl-input="1" rtrvr-gl-click="1" data-layout="vertical" rtrvr-mw-ready="1" rtrvr-mw-busy="0"><head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Symmet Studio | Arrange your room</title>
@@ -41,8 +41,8 @@ button:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
 
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Lora:wght@400;500&display=swap" />
 </head>
-<body rtrvr-ls="0~hs,5~hs,6~hs,8~hs,9~hs,13~hs,23~hs,24~hs" class="">
-<canvas id="c" aria-label="3D room. Drag furniture to move it." rtrvr-ls="5~hs,6~hs,8~hs,9~hs,49~hs"></canvas>
+<body class="">
+<canvas id="c" aria-label="3D room. Drag furniture to move it."></canvas>
 
 <div class="top">
   <div class="brand">symmet <span style="font-weight:600;color:var(--mu)">studio</span></div>
@@ -52,39 +52,55 @@ button:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
 
 <div class="warn" id="warn">Two pieces are overlapping</div>
 
-<aside class="quote" aria-live="polite" rtrvr-ls="5~hs,6~hs,8~hs,9~hs">
-  <h3 rtrvr-ls="5~hs,6~hs,8~hs,9~hs">Live quote</h3>
-  <div class="sub" rtrvr-ls="5~hs,6~hs,8~hs,9~hs">Living room, 5.4 m x 4.2 m</div>
+<aside class="quote" aria-live="polite">
+  <h3>Live quote</h3>
+  <div class="sub">Living room, 5.4 m x 4.2 m</div>
   <ul id="list"></ul>
-  <div class="x" rtrvr-ls="5~hs,6~hs,8~hs,9~hs"><span rtrvr-ls="5~hs,6~hs,8~hs,9~hs">Freight and installation</span><span id="fr"></span></div>
-  <div class="x" rtrvr-ls="5~hs,6~hs,8~hs,9~hs"><span>GST 18%</span><span id="gst"></span></div>
+  <div class="x"><span>Freight and installation</span><span id="fr"></span></div>
+  <div class="x"><span>GST 18%</span><span id="gst"></span></div>
   <div class="tot"><span>Total</span><b>Rs <span id="tot"></span></b></div>
   <div class="note">Sample prices for this mockup.</div>
 </aside>
 
-<div class="add" rtrvr-ls="0~hs,5~hs,6~hs,8~hs,9~hs,13~hs,23~hs,24~hs">
-  <span rtrvr-ls="5~hs,6~hs,8~hs,9~hs">Add a piece</span>
-  <button data-add="chair" rtrvr-ls="0~hs,5~hs,6~hs,8~hs,9~hs,13~hs,23~hs,24~hs" rtrvr-ro="38">+ Lounge chair</button>
-  <button data-add="side" rtrvr-ls="0~hs,5~hs,6~hs,8~hs,9~hs,23~hs,24~hs" rtrvr-ro="38">+ Side table</button>
-  <button data-add="coffee" rtrvr-ls="0~hs,5~hs,6~hs,8~hs,9~hs,23~hs,24~hs" rtrvr-ro="38">+ Coffee table</button>
+<div class="add">
+  <span>Add a piece</span>
+  <button data-add="chair">+ Lounge chair</button>
+  <button data-add="side">+ Side table</button>
+  <button data-add="coffee">+ Coffee table</button>
+  <button data-add="pouf">+ Silk pouf</button>
+  <button data-add="plant">+ Plant</button>
 </div>
 
-<div class="bar" rtrvr-ls="0~hs,5~hs,6~hs,8~hs,9~hs,23~hs,24~hs">
-  <button id="rotL" disabled="" rtrvr-ls="5~hs,6~hs,8~hs,9~hs" rtrvr-ro="38">Rotate left</button>
-  <button id="rotR" disabled="" rtrvr-ls="5~hs,6~hs,8~hs,9~hs" rtrvr-ro="38">Rotate right</button>
-  <button id="del" disabled="" rtrvr-ls="5~hs,6~hs,8~hs,9~hs" rtrvr-ro="38">Remove</button>
+<div class="bar">
+  <button id="rotL" disabled="">Rotate left</button>
+  <button id="rotR" disabled="">Rotate right</button>
+  <button id="del" disabled="">Remove</button>
   <div class="sep"></div>
   <button id="v3d" class="nv">3D view</button>
-  <button id="vtop" rtrvr-ls="5~hs,6~hs,8~hs,9~hs" rtrvr-ro="38">Top view</button>
-  <button id="reset" rtrvr-ls="0~hs,5~hs,6~hs,8~hs,9~hs,23~hs,24~hs" rtrvr-ro="38">Reset</button>
+  <button id="vtop">Top view</button>
+  <button id="reset">Reset</button>
 </div>
-<div class="help">Keys: R rotate, Delete remove, Esc deselect</div>
+<div class="help">Keys: R rotate, Delete remove, Esc deselect<br>Sofa, chair, pouf and plant: KhronosGroup glTF Sample Assets (see repo for licence). Placeholders, not Symmet products.</div>
+<div class="warn" id="loading" style="display:none;background:#1C2739;color:#FAFAF0;border-color:#1C2739">Loading realistic furniture...</div>
 
 <script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.160.0/build/three.module.js","three/addons/":"https://unpkg.com/three@0.160.0/examples/jsm/"}}</script>
 <script type="module">
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+// Realistic furniture: scanned/authored PBR models from the open KhronosGroup/glTF-Sample-Assets repo on GitHub
+const KH='https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/';
+const GLB={
+  sofa:{url:KH+'GlamVelvetSofa/glTF-Binary/GlamVelvetSofa.glb',width:2.2},
+  chair:{url:KH+'SheenChair/glTF-Binary/SheenChair.glb',width:.75},
+  pouf:{url:KH+'SpecularSilkPouf/glTF-Binary/SpecularSilkPouf.glb',width:.55},
+  plant:{url:KH+'DiffuseTransmissionPlant/glTF-Binary/DiffuseTransmissionPlant.glb',height:1.1},
+};
+const loader=new GLTFLoader(),cache={};let pending=0;
+const loadEl=document.getElementById('loading');
+function setLoading(){loadEl.style.display=pending>0?'block':'none';}
 
 const W=5.4, D=4.2, H=2.7, T=.12;
 const cv=document.getElementById('c');
@@ -94,6 +110,8 @@ R.shadowMap.enabled=true;R.shadowMap.type=THREE.PCFSoftShadowMap;
 R.outputColorSpace=THREE.SRGBColorSpace;R.toneMapping=THREE.ACESFilmicToneMapping;R.toneMappingExposure=1.05;
 R.setClearColor(0xFAFAF0);
 const S=new THREE.Scene();
+const pmrem=new THREE.PMREMGenerator(R);
+S.environment=pmrem.fromScene(new RoomEnvironment(),0.04).texture;
 
 // camera: isometric-style orthographic
 const cam=new THREE.OrthographicCamera(-1,1,1,-1,.1,100);
@@ -111,7 +129,7 @@ function size(){
 addEventListener('resize',size);size();
 
 // light
-S.add(new THREE.HemisphereLight(0xfffaf0,0xd8d2c2,1.1));
+S.add(new THREE.HemisphereLight(0xfffaf0,0xd8d2c2,.45));
 const sun=new THREE.DirectionalLight(0xfff0d6,2.6);
 sun.position.set(-7,7,2);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);
 Object.assign(sun.shadow.camera,{left:-6,right:6,top:6,bottom:-6,near:1,far:30});sun.shadow.radius=6;sun.shadow.bias=-.0004;
@@ -203,12 +221,28 @@ const BUILD={
     mesh(new THREE.CylinderGeometry(.03,.03,.5,16),M.leg,0,.26,0,g);mesh(new THREE.CylinderGeometry(.17,.19,.025,40),M.leg,0,.0125,0,g);}},
 };
 
+BUILD.pouf={name:'Silk pouf',price:12000,make(g){mesh(new THREE.CylinderGeometry(.27,.27,.4,40),M.gold,0,.2,0,g);}};
+BUILD.plant={name:'Indoor plant',price:3500,make(g){mesh(new THREE.CylinderGeometry(.16,.12,.35,24),M.skirt,0,.175,0,g);
+  mesh(new THREE.IcosahedronGeometry(.32,1),new THREE.MeshStandardMaterial({color:0x4f7a52,roughness:.9}),0,.7,0,g);}};
+function loadInto(g,type){
+  const spec=GLB[type];pending++;setLoading();
+  if(!cache[spec.url])cache[spec.url]=loader.loadAsync(spec.url);
+  cache[spec.url].then(gltf=>{
+    const m=gltf.scene.clone(true);
+    m.traverse(o=>{if(o.isMesh){o.castShadow=o.receiveShadow=true;}});
+    let b=new THREE.Box3().setFromObject(m);const s0=b.getSize(new THREE.Vector3());
+    const k=spec.height?spec.height/s0.y:spec.width/Math.max(s0.x,s0.z);m.scale.multiplyScalar(k);
+    b=new THREE.Box3().setFromObject(m);const c=b.getCenter(new THREE.Vector3());
+    m.position.x-=c.x;m.position.z-=c.z;m.position.y-=b.min.y;g.add(m);
+  }).catch(err=>{console.warn('Model failed, using fallback',type,err);BUILD[type].make(g);})
+  .finally(()=>{pending--;setLoading();if(items.includes(g)){clampItem(g);if(sel===g)helper.box.copy(footprint(g));checkOverlap();}});
+}
 const items=[];let sel=null,uid=0;
 function add(type,x,z,ry=0){
-  const g=new THREE.Group();g.userData={type,id:++uid,...BUILD[type]};BUILD[type].make(g);
+  const g=new THREE.Group();g.userData={type,id:++uid,...BUILD[type]};if(GLB[type])loadInto(g,type);else BUILD[type].make(g);
   g.position.set(x,0,z);g.rotation.y=ry;S.add(g);items.push(g);clampItem(g);updateQuote();return g;
 }
-const START=[['media',-W/2+.3,.15,Math.PI/2],['sofa',.55,-D/2+.52,0],['coffee',.2,.15,0],['chair',1.55,1.25,-Math.PI/4]];
+const START=[['media',-W/2+.3,.15,Math.PI/2],['sofa',.55,-D/2+.52,0],['coffee',.2,.15,0],['chair',1.55,1.25,-Math.PI/4],['plant',-W/2+.35,-D/2+.35,0]];
 function reset(){[...items].forEach(remove);START.forEach(a=>add(...a));select(null);}
 
 // footprint helpers
