@@ -79,6 +79,7 @@ button:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
   <button id="v3d" class="nv">3D view</button>
   <button id="vtop">Top view</button>
   <button id="reset">Reset</button>
+  <button id="real">Realistic models (slow)</button>
 </div>
 <div class="help">Keys: R rotate, Delete remove, Esc deselect<br>Sofa, chair, pouf and plant: KhronosGroup glTF Sample Assets (see repo for licence). Placeholders, not Symmet products.</div>
 <div class="warn" id="loading" style="display:none;background:#1C2739;color:#FAFAF0;border-color:#1C2739">Loading realistic furniture...</div>
@@ -98,14 +99,14 @@ const GLB={
   pouf:{url:KH+'SpecularSilkPouf/glTF-Binary/SpecularSilkPouf.glb',width:.55},
   plant:{url:KH+'DiffuseTransmissionPlant/glTF-Binary/DiffuseTransmissionPlant.glb',height:1.1},
 };
-const loader=new GLTFLoader(),cache={};let pending=0;
+const loader=new GLTFLoader(),cache={};let pending=0;let REAL=false;
 const loadEl=document.getElementById('loading');
 function setLoading(){loadEl.style.display=pending>0?'block':'none';}
 
 const W=5.4, D=4.2, H=2.7, T=.12;
 const cv=document.getElementById('c');
 const R=new THREE.WebGLRenderer({canvas:cv,antialias:true});
-R.setPixelRatio(Math.min(devicePixelRatio,2));
+R.setPixelRatio(Math.min(devicePixelRatio,1.5));
 R.shadowMap.enabled=true;R.shadowMap.type=THREE.PCFSoftShadowMap;
 R.outputColorSpace=THREE.SRGBColorSpace;R.toneMapping=THREE.ACESFilmicToneMapping;R.toneMappingExposure=1.05;
 R.setClearColor(0xFAFAF0);
@@ -131,7 +132,7 @@ addEventListener('resize',size);size();
 // light
 S.add(new THREE.HemisphereLight(0xfffaf0,0xd8d2c2,.45));
 const sun=new THREE.DirectionalLight(0xfff0d6,2.6);
-sun.position.set(-7,7,2);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);
+sun.position.set(-7,7,2);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);
 Object.assign(sun.shadow.camera,{left:-6,right:6,top:6,bottom:-6,near:1,far:30});sun.shadow.radius=6;sun.shadow.bias=-.0004;
 S.add(sun);
 const fill=new THREE.DirectionalLight(0xffffff,.5);fill.position.set(6,6,8);S.add(fill);
@@ -239,7 +240,7 @@ function loadInto(g,type){
 }
 const items=[];let sel=null,uid=0;
 function add(type,x,z,ry=0){
-  const g=new THREE.Group();g.userData={type,id:++uid,...BUILD[type]};if(GLB[type])loadInto(g,type);else BUILD[type].make(g);
+  const g=new THREE.Group();g.userData={type,id:++uid,...BUILD[type]};if(REAL&&GLB[type])loadInto(g,type);else BUILD[type].make(g);
   g.position.set(x,0,z);g.rotation.y=ry;S.add(g);items.push(g);clampItem(g);updateQuote();return g;
 }
 const START=[['media',-W/2+.3,.15,Math.PI/2],['sofa',.55,-D/2+.52,0],['coffee',.2,.15,0],['chair',1.55,1.25,-Math.PI/4],['plant',-W/2+.35,-D/2+.35,0]];
@@ -325,6 +326,8 @@ function loop(){
   ctl.update();R.render(S,cam);requestAnimationFrame(loop);
 }
 loop();
+
+document.getElementById('real').onclick=e=>{REAL=!REAL;e.target.textContent=REAL?'Simple models (fast)':'Realistic models (slow)';document.getElementById('reset').click();};
 </script>
 
 
